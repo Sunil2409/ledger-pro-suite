@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Transactions - Finance Portfolio Manager{% endblock %}
+{% block page_title %}Transactions{% endblock %}
+{% block page_subtitle %}Manage your income and expenses{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+    <div class="flex space-x-3">
+        <a href="{% url 'transaction_create' %}" class="btn-primary px-6 py-3 rounded-lg text-white font-medium">
+            + Add Transaction
+        </a>
+    </div>
+    
+    <!-- Filters -->
+    <form method="get" class="flex flex-wrap gap-3">
+        <select name="type" class="px-4 py-2 rounded-lg border border-gray-600 text-sm" onchange="this.form.submit()">
+            <option value="">All Types</option>
+            {% for value, label in transaction_types %}
+            <option value="{{ value }}" {% if current_type == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        
+        <select name="category" class="px-4 py-2 rounded-lg border border-gray-600 text-sm" onchange="this.form.submit()">
+            <option value="">All Categories</option>
+            {% for value, label in categories %}
+            <option value="{{ value }}" {% if current_category == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        
+        <input type="text" name="search" value="{{ current_search }}" 
+               placeholder="Search..." 
+               class="px-4 py-2 rounded-lg border border-gray-600 text-sm">
+        
+        <button type="submit" class="btn-primary px-6 py-2 rounded-lg text-white text-sm">
+            Filter
+        </button>
+        
+        {% if current_type or current_category or current_search %}
+        <a href="{% url 'transaction_list' %}" class="px-6 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm">
+            Clear
+        </a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Transactions Table -->
+<div class="card rounded-lg shadow-lg overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-gray-800 border-b border-gray-700">
+                <tr>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Date</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Type</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Category</th>
+                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">Description</th>
+                    <th class="px-6 py-4 text-right text-xs font-semibold text-gray-300 uppercase tracking-wider">Amount</th>
+                    <th class="px-6 py-4 text-right text-xs font-semibold text-gray-300 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-700">
+                {% if transactions %}
+                    {% for transaction in transactions %}
+                    <tr class="table-row">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                            {{ transaction.date|date:"M d, Y" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full 
+                                       {% if transaction.transaction_type == 'INCOME' %}bg-green-500 bg-opacity-20 text-green-400{% else %}bg-red-500 bg-opacity-20 text-red-400{% endif %}">
+                                {{ transaction.get_transaction_type_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                            {{ transaction.get_category_display }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-400">
+                            {{ transaction.description|truncatewords:10|default:"—" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right font-semibold
+                                   {% if transaction.transaction_type == 'INCOME' %}positive{% else %}negative{% endif %}">
+                            {% if transaction.transaction_type == 'INCOME' %}+{% else %}-{% endif %}${{ transaction.amount|floatformat:2 }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                            <a href="{% url 'transaction_update' transaction.pk %}" 
+                               class="text-blue-400 hover:text-blue-300 mr-3">Edit</a>
+                            <a href="{% url 'transaction_delete' transaction.pk %}" 
+                               class="text-red-400 hover:text-red-300">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-gray-400">
+                            No transactions found. <a href="{% url 'transaction_create' %}" class="text-blue-400 hover:underline">Add your first transaction</a>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+<div class="mt-6 flex justify-center">
+    <nav class="flex space-x-2">
+        {% if page_obj.has_previous %}
+        <a href="?page=1" class="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700">First</a>
+        <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700">Previous</a>
+        {% endif %}
+        
+        <span class="px-4 py-2 bg-blue-600 text-white rounded-lg">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+        
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700">Next</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}" class="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700">Last</a>
+        {% endif %}
+    </nav>
+</div>
+{% endif %}
+{% endblock %}

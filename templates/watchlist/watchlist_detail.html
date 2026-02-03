@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ item.symbol }} - Finance Portfolio Manager{% endblock %}
+{% block page_title %}{{ item.symbol }}{% endblock %}
+{% block page_subtitle %}{{ item.name|default:"Investment Details" }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Header Actions -->
+    <div class="mb-6 flex justify-end space-x-3">
+        <a href="{% url 'watchlist_update' item.pk %}" class="btn-primary px-6 py-3 rounded-lg text-white font-medium">
+            Edit Details
+        </a>
+        <a href="{% url 'watchlist_delete' item.pk %}" class="px-6 py-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium">
+            Remove
+        </a>
+    </div>
+    
+    <!-- Main Info Card -->
+    <div class="card p-8 rounded-lg shadow-lg mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+                <h3 class="text-sm font-medium text-gray-400 mb-1">Symbol</h3>
+                <p class="text-3xl font-bold text-white">{{ item.symbol }}</p>
+            </div>
+            
+            <div class="flex justify-end items-center">
+                <span class="px-6 py-2 text-lg font-bold rounded-full uppercase
+                           {% if item.status == 'BUY' %}badge-buy{% elif item.status == 'HOLD' %}badge-hold{% else %}badge-sell{% endif %}">
+                    {{ item.get_status_display }}
+                </span>
+            </div>
+        </div>
+        
+        {% if item.name %}
+        <div class="mt-4 pt-4 border-t border-gray-700">
+            <h3 class="text-sm font-medium text-gray-400 mb-1">Company/Asset Name</h3>
+            <p class="text-lg text-white">{{ item.name }}</p>
+        </div>
+        {% endif %}
+        
+        <div class="mt-4 pt-4 border-t border-gray-700">
+            <h3 class="text-sm font-medium text-gray-400 mb-1">Asset Type</h3>
+            <p class="text-lg text-white">{{ item.get_asset_type_display }}</p>
+        </div>
+    </div>
+    
+    <!-- Price Information -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="card p-6 rounded-lg shadow-lg">
+            <h3 class="text-sm font-medium text-gray-400 mb-2">Current Price</h3>
+            {% if item.current_price %}
+            <p class="text-3xl font-bold text-white">${{ item.current_price|floatformat:2 }}</p>
+            {% else %}
+            <p class="text-xl text-gray-500">Not set</p>
+            {% endif %}
+        </div>
+        
+        <div class="card p-6 rounded-lg shadow-lg">
+            <h3 class="text-sm font-medium text-gray-400 mb-2">Target Price</h3>
+            {% if item.target_price %}
+            <p class="text-3xl font-bold text-white">${{ item.target_price|floatformat:2 }}</p>
+            {% if item.current_price %}
+                {% with potential_gain=item.target_price|add:item.current_price|mul:-1|add:item.target_price %}
+                <p class="text-sm mt-2 {% if potential_gain >= 0 %}positive{% else %}negative{% endif %}">
+                    Potential: {% if potential_gain >= 0 %}+{% endif %}${{ potential_gain|floatformat:2 }}
+                </p>
+                {% endwith %}
+            {% endif %}
+            {% else %}
+            <p class="text-xl text-gray-500">Not set</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Position Details -->
+    {% if item.quantity %}
+    <div class="card p-8 rounded-lg shadow-lg mb-6">
+        <h3 class="text-xl font-semibold text-white mb-6 border-b border-gray-700 pb-2">Position Details</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div>
+                <h4 class="text-sm font-medium text-gray-400 mb-2">Quantity</h4>
+                <p class="text-2xl font-bold text-white">{{ item.quantity|floatformat:4 }}</p>
+            </div>
+            
+            <div>
+                <h4 class="text-sm font-medium text-gray-400 mb-2">Purchase Price</h4>
+                {% if item.purchase_price %}
+                <p class="text-2xl font-bold text-white">${{ item.purchase_price|floatformat:2 }}</p>
+                {% else %}
+                <p class="text-lg text-gray-500">—</p>
+                {% endif %}
+            </div>
+            
+            <div>
+                <h4 class="text-sm font-medium text-gray-400 mb-2">Total Cost</h4>
+                {% if item.total_cost %}
+                <p class="text-2xl font-bold text-white">${{ item.total_cost|floatformat:2 }}</p>
+                {% else %}
+                <p class="text-lg text-gray-500">—</p>
+                {% endif %}
+            </div>
+            
+            <div>
+                <h4 class="text-sm font-medium text-gray-400 mb-2">Current Value</h4>
+                {% if item.total_value %}
+                <p class="text-2xl font-bold text-white">${{ item.total_value|floatformat:2 }}</p>
+                {% else %}
+                <p class="text-lg text-gray-500">—</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if item.gain_loss %}
+        <div class="mt-6 pt-6 border-t border-gray-700">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="text-sm font-medium text-gray-400 mb-2">Unrealized Gain/Loss</h4>
+                    <p class="text-3xl font-bold {% if item.gain_loss >= 0 %}positive{% else %}negative{% endif %}">
+                        {% if item.gain_loss >= 0 %}+{% endif %}${{ item.gain_loss|floatformat:2 }}
+                    </p>
+                </div>
+                
+                {% if item.gain_loss_percentage %}
+                <div>
+                    <h4 class="text-sm font-medium text-gray-400 mb-2">Return %</h4>
+                    <p class="text-3xl font-bold {% if item.gain_loss_percentage >= 0 %}positive{% else %}negative{% endif %}">
+                        {% if item.gain_loss_percentage >= 0 %}+{% endif %}{{ item.gain_loss_percentage|floatformat:2 }}%
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    <!-- Notes -->
+    {% if item.notes %}
+    <div class="card p-8 rounded-lg shadow-lg mb-6">
+        <h3 class="text-xl font-semibold text-white mb-4 border-b border-gray-700 pb-2">Investment Notes</h3>
+        <div class="text-gray-300 whitespace-pre-wrap">{{ item.notes }}</div>
+    </div>
+    {% endif %}
+    
+    <!-- Metadata -->
+    <div class="card p-6 rounded-lg shadow-lg">
+        <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+                <span class="text-gray-400">Added on:</span>
+                <span class="text-white ml-2">{{ item.created_at|date:"M d, Y" }}</span>
+            </div>
+            <div>
+                <span class="text-gray-400">Last updated:</span>
+                <span class="text-white ml-2">{{ item.updated_at|date:"M d, Y" }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

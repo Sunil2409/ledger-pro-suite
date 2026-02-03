@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Budget Settings - Finance Portfolio Manager{% endblock %}
+{% block page_title %}Budget Settings{% endblock %}
+{% block page_subtitle %}Manage your monthly spending limit{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="card p-8 rounded-lg shadow-lg">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <div class="bg-blue-900 bg-opacity-30 border border-blue-700 rounded-lg p-4 mb-6">
+                <div class="flex items-start">
+                    <svg class="w-5 h-5 text-blue-400 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <div>
+                        <h4 class="text-blue-300 font-semibold mb-1">About Monthly Budget</h4>
+                        <p class="text-blue-200 text-sm">
+                            Set a monthly spending limit to help control your expenses. The system will track your spending against this budget and alert you when you're approaching the limit.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <label for="{{ form.monthly_budget.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">
+                    Monthly Budget Limit ($)
+                </label>
+                {{ form.monthly_budget }}
+                {% if form.monthly_budget.errors %}
+                <p class="mt-1 text-sm text-red-400">{{ form.monthly_budget.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-2 text-xs text-gray-400">
+                    This amount represents your maximum monthly spending target for expenses.
+                </p>
+            </div>
+            
+            <div class="flex space-x-4 pt-4">
+                <button type="submit" class="btn-primary flex-1 py-3 px-6 rounded-lg text-white font-medium">
+                    Update Budget
+                </button>
+                <a href="{% url 'dashboard' %}" class="flex-1 text-center py-3 px-6 bg-gray-700 hover:bg-gray-600 rounded-lg text-white font-medium">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="card p-4 rounded-lg text-center">
+            <p class="text-gray-400 text-sm mb-1">Recommended</p>
+            <button onclick="document.getElementById('{{ form.monthly_budget.id_for_label }}').value = '3000'" 
+                    class="text-blue-400 hover:text-blue-300 font-semibold">
+                $3,000
+            </button>
+        </div>
+        <div class="card p-4 rounded-lg text-center">
+            <p class="text-gray-400 text-sm mb-1">Moderate</p>
+            <button onclick="document.getElementById('{{ form.monthly_budget.id_for_label }}').value = '5000'" 
+                    class="text-blue-400 hover:text-blue-300 font-semibold">
+                $5,000
+            </button>
+        </div>
+        <div class="card p-4 rounded-lg text-center">
+            <p class="text-gray-400 text-sm mb-1">Flexible</p>
+            <button onclick="document.getElementById('{{ form.monthly_budget.id_for_label }}').value = '10000'" 
+                    class="text-blue-400 hover:text-blue-300 font-semibold">
+                $10,000
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Finance Portfolio Manager{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}Track investment opportunities{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="card p-8 rounded-lg shadow-lg">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div class="bg-red-900 border border-red-700 text-red-200 px-4 py-3 rounded-lg">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+            
+            <!-- Basic Information -->
+            <div>
+                <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-700 pb-2">Basic Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.symbol.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">
+                            Symbol * <span class="text-xs text-gray-500">(e.g., AAPL, MSFT)</span>
+                        </label>
+                        {{ form.symbol }}
+                        {% if form.symbol.errors %}
+                        <p class="mt-1 text-sm text-red-400">{{ form.symbol.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">
+                            Name
+                        </label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                        <p class="mt-1 text-sm text-red-400">{{ form.name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.asset_type.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">
+                            Asset Type *
+                        </label>
+                        {{ form.asset_type }}
+                        {% if form.asset_type.errors %}
+                        <p class="mt-1 text-sm text-red-400">{{ form.asset_type.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.status.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">
+                            Status *
+                        </label>
+                        {{ form.status }}
+                        {% if form.status.errors %}
+                        <p class="mt-1 text-sm text-red-400">{{ form.status.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Price Information -->
+            <div>
+                <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-700 pb-2">Price Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.current_price.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">
+                            Current Price ($)
+                        </label>
+                        {{ form.current_price }}
+                        {% if form.current_price.errors %}
+                        <p class="mt-1 text-sm text-red-400">{{ form.current_price.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-400">Latest market price</p>
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.target_price.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">
+                            Target Price ($)
+                        </label>
+                        {{ form.target_price }}
+                        {% if form.target_price.errors %}
+                        <p class="mt-1 text-sm text-red-400">{{ form.target_price.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-400">Your price target</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Position Details -->
+            <div>
+                <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-700 pb-2">Position Details (Optional)</h3>
+                <div class="bg-blue-900 bg-opacity-20 border border-blue-700 rounded-lg p-3 mb-4">
+                    <p class="text-blue-200 text-xs">
+                        Fill in these fields if you already own this asset to track your position's performance.
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.quantity.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">
+                            Quantity
+                        </label>
+                        {{ form.quantity }}
+                        {% if form.quantity.errors %}
+                        <p class="mt-1 text-sm text-red-400">{{ form.quantity.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-400">Number of shares/units owned</p>
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.purchase_price.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">
+                            Purchase Price ($)
+                        </label>
+                        {{ form.purchase_price }}
+                        {% if form.purchase_price.errors %}
+                        <p class="mt-1 text-sm text-red-400">{{ form.purchase_price.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-1 text-xs text-gray-400">Average cost per share/unit</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Notes -->
+            <div>
+                <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-700 pb-2">Investment Notes</h3>
+                <div>
+                    <label for="{{ form.notes.id_for_label }}" class="block text-sm font-medium text-gray-300 mb-2">
+                        Notes & Research
+                    </label>
+                    {{ form.notes }}
+                    {% if form.notes.errors %}
+                    <p class="mt-1 text-sm text-red-400">{{ form.notes.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-400">Add your investment thesis, research notes, or analysis</p>
+                </div>
+            </div>
+            
+            <div class="flex space-x-4 pt-4">
+                <button type="submit" class="btn-primary flex-1 py-3 px-6 rounded-lg text-white font-medium">
+                    {{ button_text }}
+                </button>
+                <a href="{% url 'watchlist_list' %}" class="flex-1 text-center py-3 px-6 bg-gray-700 hover:bg-gray-600 rounded-lg text-white font-medium">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
