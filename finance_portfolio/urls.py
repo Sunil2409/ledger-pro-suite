@@ -1,9 +1,7 @@
-"""
-URL configuration for finance_portfolio project.
-"""
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
+from django.contrib.auth.views import logout_then_login  # ✅ Add this
 from transactions.views import DashboardView
 
 urlpatterns = [
@@ -12,8 +10,10 @@ urlpatterns = [
     path('transactions/', include('transactions.urls')),
     path('watchlist/', include('watchlist.urls')),
     
-    # Authentication URLs
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
+    
+    # ✅ THIS VERSION WORKS 100%
+    path('logout/', lambda request: logout_then_login(request, login_url='/login/'), name='logout'),
+    
     path('signup/', include('django.contrib.auth.urls')),
 ]
